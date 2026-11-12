@@ -1,4 +1,7 @@
-# Benchmarks: method, results, and the experiment log
+# Benchmarks: method, results, and the experiment log (part 1, the matching engine)
+
+The trading path's measurements (tick-to-trade per stage, one and two threads,
+flat out and paced) are in [PATH.md](PATH.md#the-measurement).
 
 ## The day
 

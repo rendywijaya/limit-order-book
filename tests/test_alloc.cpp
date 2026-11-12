@@ -13,25 +13,40 @@
 
 #include <atomic>
 #include <cstdlib>
+#include <memory>
 #include <new>
 #include <random>
+#include <vector>
 
 #include "lob/book_v1.hpp"
 #include "lob/book_v2.hpp"
 
+#include <execinfo.h>
+
 namespace {
 
 std::atomic<std::uint64_t> g_news{0}, g_deletes{0};
+std::atomic<bool>          g_trace{false};  // print the stack of the next allocation (LOB_TRACE_ALLOC=1)
 
 }  // namespace
 
 void* operator new(std::size_t n) {
     g_news.fetch_add(1, std::memory_order_relaxed);
+    if (g_trace.exchange(false, std::memory_order_relaxed)) {
+        void* bt[40];
+        int depth = backtrace(bt, 40);
+        backtrace_symbols_fd(bt, depth, 2);
+    }
     if (void* p = std::malloc(n ? n : 1)) return p;
     throw std::bad_alloc();
 }
 void operator delete(void* p) noexcept {
     g_deletes.fetch_add(1, std::memory_order_relaxed);
+    if (g_trace.exchange(false, std::memory_order_relaxed)) {
+        void* bt[40];
+        int depth = backtrace(bt, 40);
+        backtrace_symbols_fd(bt, depth, 2);
+    }
     std::free(p);
 }
 void operator delete(void* p, std::size_t) noexcept {
@@ -114,4 +129,75 @@ TEST(Allocation, V2StillAllocatesWhenItOutgrowsItsReservation) {
     auto day = realistic_day(200'000, 7);
     BookConfig cfg{.min_price = 1, .max_price = 1 << 16, .expected_orders = 8};
     EXPECT_GT(heap_calls_during_replay<BookV2<CountingListener>>(day, cfg), 0u);
+}
+
+// ---- the whole path ---------------------------------------------------------
+// Every component between a market-data message and the order bytes must be
+// allocation-free in steady state: feed handler, snapshot, quoter, risk,
+// gateway, SoupBinTCP framing, the simulated exchange's answers back.
+#include "lob/path.hpp"
+
+namespace {
+std::vector<std::uint8_t> path_capture(std::size_t n) {
+    std::mt19937_64 rng(11);
+    std::vector<std::uint8_t> out;
+    std::uint8_t buf[64];
+    auto emit = [&](std::size_t k) { lob::stream_append(out, {buf, k}); };
+    std::uint64_t ns = 34'200'000'000'000ull, ref = 1, match = 1;
+    emit(lob::itch::encode_stock_directory(buf, 1, ns, "AAPL"));
+    std::vector<std::uint64_t> live;
+    std::uint32_t mid = 1'500'000;
+    while (out.size() < n) {
+        ns += 1 + rng() % 20'000;
+        int r = int(rng() % 100);
+        if (live.size() < 50 || r < 50) {
+            char side = rng() % 2 ? 'B' : 'S';
+            std::uint32_t px = side == 'B' ? mid - 100 - 100 * std::uint32_t(rng() % 4) : mid + 100 + 100 * std::uint32_t(rng() % 4);
+            emit(lob::itch::encode_add(buf, 1, ns, ref, side, 100, "AAPL", px));
+            live.push_back(ref++);
+        } else if (r < 85) {
+            std::size_t i = rng() % live.size();
+            emit(lob::itch::encode_delete(buf, 1, ns, live[i]));
+            live.erase(live.begin() + long(i));
+        } else if (r < 97) {
+            std::size_t i = rng() % live.size();
+            emit(lob::itch::encode_executed(buf, 1, ns, live[i], 100, match++));
+            live.erase(live.begin() + long(i));
+        } else {
+            mid += rng() % 2 ? 100 : std::uint32_t(-100);
+        }
+    }
+    return out;
+}
+}  // namespace
+
+TEST(Allocation, TheWholePathMakesNoHeapCallsAfterWarmUp) {
+    auto cap = path_capture(3'000'000);
+    lob::PathConfig cfg;
+    cfg.symbol = "AAPL";
+    cfg.quoter = {.half_spread_ticks = 1, .quote_qty = 100, .skew_ticks_per_lot = 1, .requote_threshold = 1, .max_position = 300};
+    cfg.risk = {.max_order_qty = 100, .collar_ticks = 20, .max_notional = 100'000'000, .max_open_orders = 4, .max_position = 300, .max_msgs_per_sec = 1'000'000};
+    lob::FeedSide feed(cfg);
+    std::unique_ptr<lob::Strategy> strat;
+    lob::StageHistograms h;
+    lob::StreamReader rd(cap);
+    lob::MarketUpdate u;
+    std::uint64_t seq = 0, n0 = 0, d0 = 0, orders_after_warmup = 0;
+    for (lob::wire::Bytes m = rd.next(); !m.empty(); m = rd.next(), ++seq) {
+        if (seq == 20'000) { n0 = g_news.load(); d0 = g_deletes.load(); }  // warm-up done
+        if (seq >= 20'000 && std::getenv("LOB_TRACE_ALLOC")) g_trace.store(true);
+        bool quoted = feed.on_message(m, 0, seq, u);
+        if (!quoted) continue;
+        if (!strat) { strat = std::make_unique<lob::Strategy>(cfg, u.ev.locate); strat->start(u.itch_ns); }
+        auto before = strat->counts().sent_new + strat->counts().sent_replace + strat->counts().sent_cancel;
+        if (seq >= 20'000 && std::getenv("LOB_TRACE_ALLOC")) g_trace.store(true);
+        strat->on_update(u, u.t_feed_done, h, true);
+        g_trace.store(false);
+        if (seq >= 20'000) orders_after_warmup += strat->counts().sent_new + strat->counts().sent_replace + strat->counts().sent_cancel - before;
+    }
+    // Read the counters BEFORE any assertion: a failing EXPECT allocates its message.
+    const std::uint64_t heap_calls = (g_news.load() - n0) + (g_deletes.load() - d0);
+    ASSERT_GT(seq, 20'000u);
+    EXPECT_GT(orders_after_warmup, 50u) << "the path must actually have been sending orders";
+    EXPECT_EQ(heap_calls, 0u) << "heap calls on the message path after warm-up";
 }

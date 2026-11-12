@@ -15,6 +15,7 @@ option(LOB_TESTS    "Build tests" ON)
 option(LOB_BENCH    "Build benchmarks" ON)
 
 # The library is header-only: the books are templates on their listener.
+find_package(Threads REQUIRED)
 add_library(lob INTERFACE)
 target_include_directories(lob INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(lob INTERFACE cxx_std_20)
@@ -55,7 +56,7 @@ if(LOB_TESTS)
     FetchContent_MakeAvailable(googletest)
   endif()
   include(GoogleTest)
-  set(LOB_TEST_SOURCES spec property components)
+  set(LOB_TEST_SOURCES spec property components itch feed ouch soupbin risk quoter gateway components2 path)
   # test_alloc replaces the global operator new/delete to count heap calls.
   # The sanitizers replace them too, so the two cannot coexist in one binary;
   # the test runs in the ordinary builds, where its count is meaningful.
@@ -74,4 +75,8 @@ if(LOB_BENCH)
   target_link_libraries(gen_day PRIVATE lob lob_warnings)
   add_executable(replay bench/replay.cpp)
   target_link_libraries(replay PRIVATE lob lob_warnings)
+  add_executable(gen_itch bench/gen_itch.cpp)
+  target_link_libraries(gen_itch PRIVATE lob lob_warnings)
+  add_executable(tick_to_trade bench/tick_to_trade.cpp)
+  target_link_libraries(tick_to_trade PRIVATE lob lob_warnings Threads::Threads)
 endif()

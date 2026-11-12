@@ -32,6 +32,13 @@ jobs:
         run: |
           ./build/gen_day --messages 1000000 --out day.bin
           ./build/replay --day day.bin --runs 1
+      - name: Tick-to-trade smoke run and determinism check
+        if: matrix.mode == 'Release'
+        run: |
+          ./build/gen_itch --messages 500000 --symbols 4 --out capture.itch
+          ./build/tick_to_trade --capture capture.itch --symbol AAPL --check
+          ./build/tick_to_trade --capture capture.itch --symbol AAPL --threads 1 --warmup 50000
+          ./build/tick_to_trade --capture capture.itch --symbol AAPL --threads 2 --warmup 50000
 
   # x86-64 numbers and a deterministic profile. Shared runners are noisy, so
   # the replay here is for rdtsc-resolution distributions, not for absolute
@@ -53,6 +60,12 @@ jobs:
         run: ./build/gen_day --messages 5000000 --seed 42 --out day.bin
       - name: Replay with rdtsc (full day, 5 runs)
         run: ./build/replay --day day.bin --runs 5 --json replay-x86.json | tee replay-x86.md
+      - name: Tick-to-trade with rdtsc (2M messages, 8 symbols)
+        run: |
+          ./build/gen_itch --messages 2000000 --symbols 8 --out capture.itch
+          ./build/tick_to_trade --capture capture.itch --symbol AAPL --threads 1 --json t2t-x86-1.json | tee t2t-x86-1.md
+          ./build/tick_to_trade --capture capture.itch --symbol AAPL --threads 2 --json t2t-x86-2.json | tee t2t-x86-2.md
+          ./build/tick_to_trade --capture capture.itch --symbol AAPL --mode paced --speed 10 --json t2t-x86-paced.json | tee t2t-x86-paced.md
       - name: Cachegrind, 300k messages, both books
         run: |
           ./build/gen_day --messages 300000 --seed 42 --out small.bin
@@ -69,3 +82,5 @@ jobs:
             replay-x86.md
             replay-x86.json
             cachegrind.md
+            t2t-x86-*.md
+            t2t-x86-*.json

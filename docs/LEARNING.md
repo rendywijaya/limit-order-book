@@ -152,6 +152,115 @@ Do these in your own branch. Each one is a real change with a test.
 > tick-to-trade per stage on a pinned, isolated Linux core with a paced
 > replay. That is Module 8 of my plan.
 
+## Part 2: the trading path (roadmap Module 8, lessons 12 to 16)
+
+### Reading order (about eight sessions)
+
+| # | Read | Roadmap lesson | You can answer… |
+|---|---|---|---|
+| 1 | `docs/PROTOCOLS.md`, `wire.hpp`, `itch.hpp`, `tests/test_itch.cpp` | M8 L07, L11 | Why big-endian? Why decode against hand-built bytes and not the encoder? What does a stock locate code do? |
+| 2 | `feed.hpp`, `market_book.hpp`, `tests/test_feed.cpp` | M8 L11, L12 | Why one order table for all symbols? What is a book snapshot for? What happens on a sub-penny price? |
+| 3 | `docs/STRATEGY.md`, `quoter.hpp`, `tests/test_quoter.cpp` | M8 L13 | Why one request in flight per side? Walk through a fill during a pending cancel. Why skew? |
+| 4 | `risk.hpp`, `tests/test_risk.cpp` | M8 L14 | Recite the eight checks in order. Why do cancels always pass? What is "worst-case position"? |
+| 5 | `ouch.hpp`, `soupbin.hpp`, `gateway.hpp`, their tests | M8 L15 | What does SoupBinTCP add to TCP? What does a reconnecting client send? What are OUCH's replace semantics? |
+| 6 | `exchange_sim.hpp`, `tests/test_gateway.cpp` | M8 L12, L15 | Explain the queue-position fill model and its two biases. Why does the sim answer synchronously? |
+| 7 | `histogram.hpp`, `spsc.hpp`, `path.hpp`, `bench/tick_to_trade.cpp` | M8 L16, M7 L09 | Where is each timestamp taken? Why is arrival the due time in paced mode? What is the second thread's cost? |
+| 8 | `docs/PATH.md` results | M8 L16 | Why is the path slower at the capture's real pace than flat out? Say it without notes. |
+
+### Exercises
+
+1. **The packet layer.** Wrap the capture in sequenced UDP packets (a
+   session, a sequence number, a block count, length-prefixed blocks), play
+   it on two "feeds" with drops and reordering, and write the receiver that
+   takes each message from whichever feed delivers it first, detects gaps,
+   and requests retransmission. Measure what it adds in front of the feed
+   stage. This is the layer this version leaves out, and the one every feed
+   handler interview asks about.
+2. **Quote more symbols.** Make the strategy side hold one quoter per
+   symbol and quote all eight. Which stage scales with the number quoted,
+   and which with the total message rate?
+3. **Keep it warm.** In paced mode, run a dummy decode-and-decide on a
+   synthetic message whenever the path has been idle for 5 µs. Does the
+   real tick-to-trade at 1× pace come back toward the flat-out number?
+   Which part of the gap was the CPU's clock and which was the cache?
+4. **A real socket.** Put the simulated exchange in another process on a
+   TCP socket, keep SoupBinTCP as is, and measure the gateway's round trip.
+   The one-thread and two-thread replays stop being hash-identical: explain
+   exactly why, and what "deterministic replay" can still mean.
+5. **Self-trade prevention.** The quoter's own bid and ask can never cross
+   each other here; make a second quoter on the same symbol and add the
+   check that stops them trading with each other.
+6. **Break the gateway.** Deliver a `Canceled` for a token that was never
+   sent, an `Executed` for more shares than are open, two `Accepted` for
+   one token. Which does the state machine survive, which does it count,
+   and what should a production gateway do about each?
+7. **Linux, pinned, isolated.** `--pin 2,3` on a machine with `isolcpus=2,3`.
+   Compare the queue row's p99.9 with the macOS number in PATH.md.
+
+### Interview questions, with answers to say out loud
+
+**"Walk me through your tick-to-trade path."**
+> ITCH bytes come in; the feed handler decodes them, updates the symbol's
+> book, and takes a snapshot of the top five levels. If the top moved, the
+> quoter decides from the snapshot and its position, at most one request per
+> side. Each intent goes through eight integer risk checks in a fixed order,
+> then the gateway assigns a token, encodes OUCH, frames it in SoupBinTCP
+> and puts it on the wire. A simulated exchange on the other end accepts,
+> fills by queue position from the feed, and answers in the same bytes. On
+> an M2 that is a median of 292 ns from arrival to the wire, flat out, and
+> 708 ns at the capture's real pace. One thread or two, same orders.
+
+**"Why is it slower when the market is quieter?"**
+> Flat out, every line of the decoder and the book is hot and the branch
+> predictor knows the loop. At 40 thousand messages a second there are
+> 25 microseconds between messages; other code runs, caches and TLB entries
+> are evicted, and the core may clock down. The first message after a gap
+> pays for all of it. That is why trading systems busy-poll and warm the
+> hot path with dummy work, and why a benchmark that only runs flat out is
+> optimistic.
+
+**"How do you know a fill would have happened?"**
+> Queue position. My order joins the back of the quantity the book shows at
+> its price; executions the feed shows at that price on my side consume the
+> queue ahead of me, then fill me; and if the market trades through my price
+> I'm filled in full. It is deterministic, and I state its biases: it ignores
+> hidden orders that were ahead of me and counts executions on them against
+> my queue.
+
+**"Why one request in flight per side?"**
+> Because the exchange's answer can change what the right next action is. If
+> I send a replace and a cancel for the same order back to back, I have to
+> handle every interleaving of their answers. With one in flight, each side
+> is a small state machine with six well-defined races, and each race is a
+> test.
+
+**"What does the risk gate check, and in what order?"**
+> Kill switch; a two-sided reference price exists; size; collar against the
+> mid in half-ticks; notional; open-order count; worst-case position,
+> counting every open order on that side as filled; message rate in a
+> one-second window. Cancels always pass. The exposure it reads comes from
+> the gateway's view of the exchange's answers, never from the strategy.
+
+**"What does SoupBinTCP give you that TCP doesn't?"**
+> Message boundaries and memory. TCP is a byte stream; SoupBinTCP frames
+> packets with a length and a type, numbers the server's data packets
+> implicitly from the login's sequence number, and lets a reconnecting
+> client ask for everything from the next number it expected. Plus
+> heartbeats each way every second so a dead peer is noticed in fifteen.
+
+**"How did you keep the two-thread replay deterministic?"**
+> The strategy consumes book snapshots, not the live book, and the
+> simulated exchange answers synchronously on the strategy thread from the
+> same snapshot. So the strategy sees the same sequence of inputs whether a
+> function call or a queue delivers them, and the orders hash identically.
+> With a real exchange over a socket that stops being true, and I can say
+> exactly where.
+
+**"What is missing?"**
+> The packet layer: sequenced UDP with two feeds, arbitration and gap
+> recovery. One quoted symbol. The exchange in the same process. No pinning
+> or isolation. Each is written up, and the first is my next piece of work.
+
 ## Words to know cold
 tick, touch, spread, level, depth (L2 / L3), maker / taker, price-time
 priority, IOC, FOK, queue position, cache line, false sharing, TLB, prefetch,
@@ -159,3 +268,10 @@ branch misprediction, allocation on the hot path, intrusive container,
 open addressing, load factor, tombstone, percentiles, coordinated omission,
 service time vs response time, rdtsc / invariant TSC, core pinning,
 `isolcpus`.
+
+Part 2: stock locate, order reference, price-time queue position, maker /
+taker, post-only, skew, requote threshold, one in flight, worst-case
+exposure, collar, kill switch, token, SoupBinTCP sequence number, heartbeat,
+queue-position model, trade-through, snapshot, SPSC, log-linear histogram,
+service time vs response time, due time, coordinated omission, cold-path
+latency, busy-polling.
