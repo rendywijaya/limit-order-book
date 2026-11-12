@@ -39,7 +39,13 @@ endif()
 
 if(LOB_TESTS)
   enable_testing()
-  find_package(GTest CONFIG QUIET)
+  # A sanitized test binary must not link a prebuilt, uninstrumented GoogleTest:
+  # libc++'s container annotations then disagree between the two and can report
+  # false container-overflows. Under LOB_SANITIZE, GoogleTest is built here with
+  # the same flags.
+  if(NOT LOB_SANITIZE)
+    find_package(GTest CONFIG QUIET)
+  endif()
   if(NOT GTest_FOUND)
     include(FetchContent)
     FetchContent_Declare(googletest
