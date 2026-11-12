@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.compiler }} ${{ matrix.mode }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++-14, clang++-18]
+        mode: [Release, Sanitize]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          if [ "${{ matrix.mode }}" = "Sanitize" ]; then
+            EXTRA="-DCMAKE_BUILD_TYPE=Debug -DLOB_SANITIZE=ON"
+          else
+            EXTRA="-DCMAKE_BUILD_TYPE=Release"
+          fi
+          cmake -S . -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} $EXTRA
+      - name: Build
+        run: cmake --build build -j 4
+      - name: Test
+        run: ctest --test-dir build --output-on-failure -j 4
+      - name: Benchmark smoke run (1M messages; numbers on shared CI runners are not meaningful)
+        if: matrix.mode == 'Release'
+        run: |
+          ./build/gen_day --messages 1000000 --out day.bin
+          ./build/replay --day day.bin --runs 1
