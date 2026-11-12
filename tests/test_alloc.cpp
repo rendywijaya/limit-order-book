@@ -11,6 +11,13 @@
 // GoogleTest's own allocations do not leak into it.
 #include <gtest/gtest.h>
 
+// The replacement operators below pair malloc with free on purpose. GCC's
+// -Wmismatched-new-delete sees `new` at a call site and `free` in the inlined
+// operator delete and reports a mismatch that is not one.
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic ignored "-Wmismatched-new-delete"
+#endif
+
 #include <atomic>
 #include <cstdlib>
 #include <memory>
