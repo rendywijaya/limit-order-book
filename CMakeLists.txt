@@ -49,7 +49,14 @@ if(LOB_TESTS)
     FetchContent_MakeAvailable(googletest)
   endif()
   include(GoogleTest)
-  foreach(t spec property components alloc)
+  set(LOB_TEST_SOURCES spec property components)
+  # test_alloc replaces the global operator new/delete to count heap calls.
+  # The sanitizers replace them too, so the two cannot coexist in one binary;
+  # the test runs in the ordinary builds, where its count is meaningful.
+  if(NOT LOB_SANITIZE)
+    list(APPEND LOB_TEST_SOURCES alloc)
+  endif()
+  foreach(t IN LISTS LOB_TEST_SOURCES)
     add_executable(test_${t} tests/test_${t}.cpp)
     target_link_libraries(test_${t} PRIVATE lob lob_warnings GTest::gtest_main)
     gtest_discover_tests(test_${t} DISCOVERY_TIMEOUT 60)

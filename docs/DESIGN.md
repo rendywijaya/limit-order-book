@@ -111,20 +111,61 @@ add(254, Sell, Limit, 999, 4)    add(256, Buy, FOK, 1002, 4)
   v2 : Accept{256} Cancel{256 left=4 reason=FokNotFilled}
 ```
 
-## Profiling
+## Where v1 spends its time (measured)
 
-On Linux, with frame pointers:
+Sampling profile (`sample`, 1 ms interval, 6 s) of `replay --book v1
+--skip-latency` on the 5M-message day. Build: `-O2 -g -fno-omit-frame-pointer`,
+Apple M2 Pro. Self time by top-of-stack symbol, grouped. Raw output is in
+`results/profile/sample-v1.txt` and `sample-v2.txt`.
+
+| where the samples land | v1 | v2 |
+|---|---:|---:|
+| **allocator**: `malloc`, `free`, `operator new`, the allocator's `memset` | **49 %** | **0 %** |
+| the book's own methods (the tree, list and hash walks inline into these) | 37 % | 70 % |
+| libc++ `__hash_table` / `__tree` internals that did not inline | 6 % | 0 % |
+| replay loop, `submit()` dispatch, counting listener | 6 % | 24 % |
+| other / unresolved | 2 % | 6 % |
+
+Largest single symbols in v1: `BookV1::unlink` 15 % (erase from the list,
+and erase the map node when a level empties), `_xzm_free` 14 %,
+`_xzm_xzone_malloc_tiny` 12 %, `BookV1::rest` 10 % (list `push_back`, map
+`operator[]`, hash `emplace`), `BookV1::add` 5 %, hash `emplace` 3 %, hash
+`remove` 2.5 %, the two `match` instantiations 4 % together.
+
+Three things this profile says:
+
+1. **Half of v1's time is memory management that has nothing to do with
+   matching.** Every resting order costs a list node and a hash node on the
+   way in, and both again on the way out; every new or emptied level costs a
+   tree node. The matching arithmetic itself (`match`) is 4 %.
+2. **The structural operations dominate the rest.** `unlink` and `rest`, which
+   change the containers, are 25 %. They are where the pointer chasing is.
+3. **v2 removed the allocator entirely**, as `tests/test_alloc.cpp` confirms
+   (zero heap calls over 200k messages). Its biggest single item is now the
+   replay loop and dispatch (24 %), which means the book is approaching the
+   cost of merely iterating over the messages. Within the book: `add` 19 %,
+   `match` 18 %, `rest` 12 %, `cancel` 9 %, pool `acquire` 7 %.
+
+The Linux CI job `profile` adds two machine-independent views, reported in
+[BENCHMARKS.md](BENCHMARKS.md#x86-64-linux-github-actions-runner):
+**cachegrind** counts 435 instructions per message for v1 (36 % of them in
+glibc `malloc`/`free`) and 180 for v2, and shows that 57 % of v2's remaining
+L1 data-read misses are in the id hash map, which is the next thing to
+optimize; and an **x86-64 `rdtsc` replay** at 0.385 ns resolution puts v2 at
+p50 30 ns, p99 60 ns against v1's 50 and 120.
+
+### Reproduce it
 
 ```sh
-cmake -S . -B build-prof -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS=-fno-omit-frame-pointer
+cmake -S . -B build-prof -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS=-fno-omit-frame-pointer -DLOB_TESTS=OFF
 cmake --build build-prof -j
-perf stat -e cycles,instructions,cache-misses,branch-misses ./build-prof/replay --book v1 --runs 1
-perf record -g ./build-prof/replay --book v1 --runs 1 && perf report
-valgrind --tool=callgrind ./build-prof/replay --book v1 --runs 1   # on a 200k-message day
+# macOS
+./build-prof/replay --day data/day.bin --book v1 --runs 60 --skip-latency & sleep 1; sample $! 6 -file v1.txt
+# Linux
+perf stat -e cycles,instructions,cache-misses,branch-misses ./build-prof/replay --day data/day.bin --book v1 --runs 1 --skip-latency
+perf record -g ./build-prof/replay --day data/day.bin --book v1 --runs 1 --skip-latency && perf report
+valgrind --tool=cachegrind --cache-sim=yes ./build-prof/replay --day small.bin --book v1 --runs 1 --skip-latency
 ```
-
-On macOS: `xcrun xctrace record --template 'Time Profiler' --launch -- ./build/replay --book v1`,
-then open the trace in Instruments.
 
 ## What comes next (roadmap Module 8, lessons 12–16)
 

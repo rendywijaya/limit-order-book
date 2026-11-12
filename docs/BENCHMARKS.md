@@ -75,6 +75,51 @@ Per kind of message, v2 (mean ns): passive add 30, aggressive add 41, cancel
 It does two tree lookups (one to find the level, one to drop it when emptied)
 and frees and allocates a list node when the order re-enters.
 
+## x86-64, Linux (GitHub Actions runner)
+
+The CI job `profile` replays the same day on an `ubuntu-24.04` runner (x86-64,
+GCC 14, `-O3`). It is a shared virtual machine, so the throughput is
+indicative, but `rdtsc` ticks every **0.385 ns** there, so the per-message
+distributions are at a resolution the M2's counter cannot give. Timestamp-pair
+overhead on that machine: p50 10 ns, p99 20 ns, included in the columns.
+Raw output: `results/linux-x86/`.
+
+| book | throughput | mean ns/msg | p50 | p90 | p99 | p99.9 | p99.99 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| v1 | 23.4 M msg/s | 42.7 | 50 | 70 | 120 | 190 | 1212 |
+| **v2** | **72.7 M msg/s** | **13.8** | **30** | **40** | **60** | **130** | 260 |
+| | **3.10×** | | | | | | |
+
+Per kind, v2 mean: passive add 24 ns, aggressive add 33, cancel 27, modify 43.
+v1: 42, 53, 58, 93. v1 is faster on this machine than on the M2 (glibc's
+allocator is cheaper than macOS's), so the ratio is 3.1× rather than 4.4×; v2
+costs the same 14 ns on both.
+
+### Cachegrind: instructions and cache misses, independent of the machine
+
+`valgrind --tool=cachegrind --cache-sim=yes` on 300,000 messages, same job.
+Cachegrind counts every instruction and simulates the caches, so the numbers do
+not depend on what else the runner was doing.
+
+| per message | v1 | v2 |
+|---|---:|---:|
+| instructions executed | **435** | **180** |
+| instructions inside glibc `malloc` / `free` | 157 (36 %) | 0 |
+| instructions inside the book's own code | 72 (17 %) | 112 (62 %) |
+
+Where v2's L1 data-read misses land: **57 % in the id hash map**
+(`flat_hash_map.hpp`), 40 % in `book_v2.hpp` (levels and pool). The table is
+2 MB, which fits the last-level cache but not the 48 KB L1, so every id lookup
+is an L1 miss served from L2. That is the largest remaining memory cost in v2
+and the natural next target (a smaller table, or prefetching the slot as soon
+as the id is known, before the rest of the message is decoded).
+
+Two cautions when reading cachegrind: it models no hardware prefetcher, so
+sequential reads of the day array count as misses that real hardware hides;
+and the one-time setup (reading the 7.2 MB day file, zeroing the pool, level
+arrays and hash table) is inside the totals, which is why v2's last-level
+*write* misses exceed v1's.
+
 ## Experiment log
 
 ### Experiment 1 — baseline v1
@@ -128,4 +173,6 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
 ```
 
 On Linux, add `--pin 3` to pin the thread to a core, and see
-[DESIGN.md](DESIGN.md#profiling) for `perf` commands.
+[DESIGN.md](DESIGN.md#reproduce-it) for profiler commands. Every push also
+runs the `profile` CI job and uploads `replay-x86.md` and `cachegrind.md` as a
+build artifact.

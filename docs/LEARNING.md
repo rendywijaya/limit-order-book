@@ -37,7 +37,7 @@ it is the conversation you want.
 | 4 | `include/lob/reference_book.hpp`, `tests/test_spec.cpp` | M5 L04 | Why is a slow reference useful? What is a typed test? |
 | 5 | `tests/test_property.cpp` | M5 L04 | How does shrinking work? Why do the generators *aim* for collisions? |
 | 6 | `bench/gen_day.cpp`, `bench/replay.cpp`, `bench/clock.hpp` | M5 L05 | Why a fixed seed? Why `isb`/`lfence` around the counter? What is coordinated omission, and why does it not apply here? |
-| 7 | Profile v1 yourself (DESIGN.md#profiling) | M5 L06 | Where does v1 spend its time? Show the evidence. |
+| 7 | `docs/DESIGN.md` § "Where v1 spends its time", then reproduce it | M5 L06 | Where does v1 spend its time? Quote the numbers (49 % allocator, 4 % matching), then show a run of your own. |
 | 8 | `flat_hash_map.hpp`, `level_bitmap.hpp`, `book_v2.hpp` | M5 L07 | Backward-shift deletion: why no tombstones? How does `next_ge` work across layers? |
 | 9 | `docs/BENCHMARKS.md` | M5 L08 | Explain experiment 2 end to end, without notes. |
 | 10 | This file's interview section | M5 L10 | All of it, out loud, in under two minutes per answer. |
@@ -51,7 +51,8 @@ Do these in your own branch. Each one is a real change with a test.
    most valuable exercise here.
 2. **Break it on purpose.** Plant one bug in each of v2, `FlatHashMap` and
    `LevelBitmap`. Watch which test catches each, and read the shrunk
-   reproduction.
+   reproduction. Then add one `std::vector` push to v2's `add()` and watch
+   `test_alloc` fail.
 3. **Self-trade prevention.** Add an owner id to orders. When a taker would
    trade with the same owner's resting order, cancel the resting order (one
    common policy). Update the spec, all three books, and the generator.
@@ -67,6 +68,12 @@ Do these in your own branch. Each one is a real change with a test.
    coordinated omission made visible.
 7. **Linux run.** On any Linux box (a cloud VM is fine), run with `--pin`,
    then with `isolcpus` and `nohz_full`. Compare tails (roadmap M6 L10).
+8. **Attack the hash map.** Cachegrind says 57 % of v2's L1 read misses are
+   id lookups. Try `__builtin_prefetch` on the home slot at the top of
+   `submit()`, before the switch; try a smaller table; try storing the pool
+   index for recently seen ids in a tiny direct-mapped cache in front of the
+   map. Measure each on the M2 and in the CI job. Keep only what the
+   distributions justify.
 
 ## Interview questions you will be asked, with the answers you should give
 
@@ -86,8 +93,10 @@ Do these in your own branch. Each one is a real change with a test.
 > Big-O counts comparisons, but the cost here is memory. Every node is a
 > separate allocation, so a lookup chases pointers to unpredictable addresses,
 > and each hop can be a cache miss of around 100 ns. Insert and erase also
-> call the allocator. An array indexed by price is one address calculation and
-> usually one cache line.
+> call the allocator. I measured it: 49 % of v1's samples are inside malloc
+> and free, and the matching arithmetic is 4 %. An array indexed by price is
+> one address calculation and usually one cache line, and v2 makes zero heap
+> calls on the hot path, which is a test in the repo.
 
 **"What happens when the price leaves your array window?"**
 > In this version the order is rejected, and all three books enforce the same
