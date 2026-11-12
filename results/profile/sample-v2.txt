@@ -1,0 +1,252 @@
+Analysis of sampling replay (pid 66458) every 1 millisecond
+Process:         replay [66458]
+Path:            /Users/USER/*/replay
+Load Address:    0x104964000
+Identifier:      replay
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  zsh [66236]
+Target Type:     live task
+
+Date/Time:       2026-11-12 12:44:22.458 +1100
+Launch Time:     2026-11-12 12:44:21.422 +1100
+OS Version:      macOS 26.6.2 (25G83)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+----
+
+Call graph:
+    3425 Thread_1541612   DispatchQueue_1: com.apple.main-thread  (serial)
+      3425 start  (in dyld) + 6992  [0x18e5ec4e4]
+        1632 main  (in replay) + 9496  [0x104967230]  replay.cpp:234
+        + 311 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 564,220,...  [0x10496c948,0x10496c7f0,...]  book_v2.hpp:0
+        + 192 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 256  [0x10496c814]  book_v2.hpp:67
+        + ! 60 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 108,0,...  [0x10496d130,0x10496d0c4,...]  book_v2.hpp:173
+        + ! 37 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 136  [0x10496d14c]  book_v2.hpp:179
+        + ! 30 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 188,120  [0x10496d180,0x10496d13c]  book_v2.hpp:0
+        + ! 22 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 520  [0x10496d2cc]  flat_hash_map.hpp:0
+        + ! 13 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 196  [0x10496d188]  book_v2.hpp:180
+        + ! 9 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 116  [0x10496d138]  book_v2.hpp:175
+        + ! 8 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 524  [0x10496d2d0]  book_v2.hpp:197
+        + ! 4 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 260,268  [0x10496d1c8,0x10496d1d0]  book_v2.hpp:187
+        + ! 4 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 184  [0x10496d17c]  book_v2.hpp:194
+        + ! 3 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 384,348  [0x10496d244,0x10496d220]  book_v2.hpp:193
+        + ! 2 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 280  [0x10496d1dc]  book_v2.hpp:189
+        + 185 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 600  [0x10496c96c]  book_v2.hpp:66
+        + ! 64 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 108,0,...  [0x10496ce80,0x10496ce14,...]  book_v2.hpp:173
+        + ! 31 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 188,120,...  [0x10496ced0,0x10496ce8c,...]  book_v2.hpp:0
+        + ! 27 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 136  [0x10496ce9c]  book_v2.hpp:179
+        + ! 18 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 196  [0x10496ced8]  book_v2.hpp:180
+        + ! 10 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 280,284  [0x10496cf2c,0x10496cf30]  book_v2.hpp:189
+        + ! 9 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 116  [0x10496ce88]  book_v2.hpp:175
+        + ! 8 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 520  [0x10496d01c]  flat_hash_map.hpp:0
+        + ! 7 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 348,384,...  [0x10496cf70,0x10496cf94,...]  book_v2.hpp:193
+        + ! 5 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 184  [0x10496cecc]  book_v2.hpp:194
+        + ! 4 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 260,268  [0x10496cf18,0x10496cf20]  book_v2.hpp:187
+        + ! 2 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 524  [0x10496d020]  book_v2.hpp:197
+        + 133 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 68  [0x10496d3b8]  book_v2.hpp:220
+        + ! 93 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 24  [0x10496d57c]  book_v2.hpp:155
+        + ! 38 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 8,16,...  [0x10496d56c,0x10496d574,...]  book_v2.hpp:154
+        + ! 2 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 36,44  [0x10496d588,0x10496d590]  book_v2.hpp:157
+        + 121 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 340,404,...  [0x10496d4c8,0x10496d508,...]  book_v2.hpp:235
+        + 107 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 68,132,...  [0x10496c758,0x10496c798,...]  book_v2.hpp:55
+        + 93 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 268,272,...  [0x10496d670,0x10496d674,...]  book_v2.hpp:162
+        + 74 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 124  [0x10496d3f0]  book_v2.hpp:223
+        + 56 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 268,280,...  [0x10496c820,0x10496c82c,...]  book_v2.hpp:57
+        + 47 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 680,676,...  [0x10496d0bc,0x10496d0b8,...]  book_v2.hpp:0
+        + 41 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 16,12,...  [0x10496c724,0x10496c720,...]  book_v2.hpp:54
+        + 40 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 4,0,...  [0x10496d378,0x10496d374,...]  book_v2.hpp:217
+        + 36 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 680  [0x10496d36c]  book_v2.hpp:0
+        + 34 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 304,196  [0x10496c844,0x10496c7d8]  book_v2.hpp:60
+        + 27 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 184  [0x10496c7cc]  book_v2.hpp:56
+        + 22 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 608  [0x10496c974]  book_v2.hpp:69
+        + 19 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 304  [0x10496d4a4]  book_v2.hpp:233
+        + 14 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 44,48  [0x10496d3a0,0x10496d3a4]  book_v2.hpp:218
+        + 13 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 212  [0x10496c7e8]  events.hpp:0
+        + 12 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 248  [0x10496c80c]  book_v2.hpp:67
+        + 11 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 592,216  [0x10496c964,0x10496c7ec]  book_v2.hpp:66
+        + 9 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 120,104  [0x10496d3ec,0x10496d3dc]  book_v2.hpp:222
+        + 7 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 456,528,...  [0x10496c8dc,0x10496c924,...]  book_v2.hpp:63
+        + 6 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 156  [0x10496c7b0]  book_v2.hpp:71
+        + 6 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 148  [0x10496d408]  book_v2.hpp:0
+        + 4 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 316,320  [0x10496d4b0,0x10496d4b4]  book_v2.hpp:234
+        + 3 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 52,60  [0x10496d3a8,0x10496d3b0]  book_v2.hpp:219
+        + 3 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 136,140  [0x10496d3fc,0x10496d400]  book_v2.hpp:230
+        + 1 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 604  [0x10496c970]  book_v2.hpp:68
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 68  [0x10496d3b8]  book_v2.hpp:220
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 76  [0x10496d3c0]  book_v2.hpp:221
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 188  [0x10496d430]  book_v2.hpp:225
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 312  [0x10496d4ac]  book_v2.hpp:232
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 464  [0x10496d544]  book_v2.hpp:236
+        802 main  (in replay) + 9424,9468,...  [0x1049671e8,0x104967214,...]  replay.cpp:234
+        450 main  (in replay) + 9436  [0x1049671f4]  replay.cpp:234
+        + 178 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 156  [0x10496ca68]  book_v2.hpp:77
+        + ! 43 ???  (in replay)  load address 0x104964000 + 0x6d30  [0x10496ad30]
+        + ! 40 ???  (in replay)  load address 0x104964000 + 0x6d58  [0x10496ad58]
+        + ! 25 ???  (in replay)  load address 0x104964000 + 0x6d84  [0x10496ad84]
+        + ! 19 ???  (in replay)  load address 0x104964000 + 0x6d64  [0x10496ad64]
+        + ! 17 ???  (in replay)  load address 0x104964000 + 0x6d1c  [0x10496ad1c]
+        + ! 17 ???  (in replay)  load address 0x104964000 + 0x6d80  [0x10496ad80]
+        + ! 6 ???  (in replay)  load address 0x104964000 + 0x6d28  [0x10496ad28]
+        + ! 3 ???  (in replay)  load address 0x104964000 + 0x6d08  [0x10496ad08]
+        + ! 3 ???  (in replay)  load address 0x104964000 + 0x6d68  [0x10496ad68]
+        + ! 2 ???  (in replay)  load address 0x104964000 + 0x6d3c  [0x10496ad3c]
+        + ! 2 ???  (in replay)  load address 0x104964000 + 0x6d78  [0x10496ad78]
+        + ! 1 ???  (in replay)  load address 0x104964000 + 0x6d38  [0x10496ad38]
+        + 87 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 68,56,...  [0x10496ca10,0x10496ca04,...]  book_v2.hpp:74
+        + 68 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 204,172,...  [0x10496ca98,0x10496ca78,...]  book_v2.hpp:78
+        + 57 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 12,0  [0x10496c9d8,0x10496c9cc]  book_v2.hpp:73
+        + 21 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 388,392  [0x10496cb50,0x10496cb54]  book_v2.hpp:0
+        + 13 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 332  [0x10496cb18]  flat_hash_map.hpp:0
+        + 11 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 132  [0x10496ca50]  book_v2.hpp:75
+        + 10 ???  (in replay)  load address 0x104964000 + 0x6e48  [0x10496ae48]
+        + 5 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 380  [0x10496cb48]  book_v2.hpp:79
+        375 main  (in replay) + 9516  [0x104967244]  replay.cpp:234
+        + 71 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 620  [0x10496cde0]  book_v2.hpp:100
+        + ! 23 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 188,652,...  [0x10496ced0,0x10496d0a0,...]  book_v2.hpp:0
+        + ! 13 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 196  [0x10496ced8]  book_v2.hpp:180
+        + ! 9 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 108,0  [0x10496ce80,0x10496ce14]  book_v2.hpp:173
+        + ! 8 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 136  [0x10496ce9c]  book_v2.hpp:179
+        + ! 5 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 348,340,...  [0x10496cf70,0x10496cf68,...]  book_v2.hpp:193
+        + ! 4 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 280,284  [0x10496cf2c,0x10496cf30]  book_v2.hpp:189
+        + ! 4 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 520  [0x10496d01c]  flat_hash_map.hpp:0
+        + ! 2 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 260,268  [0x10496cf18,0x10496cf20]  book_v2.hpp:187
+        + ! 2 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 184  [0x10496cecc]  book_v2.hpp:194
+        + ! 1 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 524  [0x10496d020]  book_v2.hpp:197
+        + 64 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 604  [0x10496cdd0]  book_v2.hpp:101
+        + ! 23 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 188,652,...  [0x10496d180,0x10496d350,...]  book_v2.hpp:0
+        + ! 7 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 136  [0x10496d14c]  book_v2.hpp:179
+        + ! 7 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 268,256,...  [0x10496d1d0,0x10496d1c4,...]  book_v2.hpp:187
+        + ! 6 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 280,284  [0x10496d1dc,0x10496d1e0]  book_v2.hpp:189
+        + ! 5 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 196  [0x10496d188]  book_v2.hpp:180
+        + ! 5 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 348,380,...  [0x10496d220,0x10496d240,...]  book_v2.hpp:193
+        + ! 5 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 520  [0x10496d2cc]  flat_hash_map.hpp:0
+        + ! 3 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 0,108  [0x10496d0c4,0x10496d130]  book_v2.hpp:173
+        + ! 3 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 524  [0x10496d2d0]  book_v2.hpp:197
+        + 45 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 616  [0x10496cddc]  book_v2.hpp:100
+        + 44 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 600  [0x10496cdcc]  book_v2.hpp:101
+        + 28 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 276  [0x10496cc88]  book_v2.hpp:96
+        + ! 9 ???  (in replay)  load address 0x104964000 + 0x6d58  [0x10496ad58]
+        + ! 6 ???  (in replay)  load address 0x104964000 + 0x6d84  [0x10496ad84]
+        + ! 5 ???  (in replay)  load address 0x104964000 + 0x6d40  [0x10496ad40]
+        + ! 3 ???  (in replay)  load address 0x104964000 + 0x6d28  [0x10496ad28]
+        + ! 1 ???  (in replay)  load address 0x104964000 + 0x6d18  [0x10496ad18]
+        + ! 1 ???  (in replay)  load address 0x104964000 + 0x6d30  [0x10496ad30]
+        + ! 1 ???  (in replay)  load address 0x104964000 + 0x6d64  [0x10496ad64]
+        + ! 1 ???  (in replay)  load address 0x104964000 + 0x6d68  [0x10496ad68]
+        + ! 1 ???  (in replay)  load address 0x104964000 + 0x6d80  [0x10496ad80]
+        + 16 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 236,228  [0x10496cc60,0x10496cc58]  book_v2.hpp:90
+        + 13 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 340,404  [0x10496d4c8,0x10496d508]  book_v2.hpp:235
+        + 12 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 68  [0x10496cbb8]  book_v2.hpp:84
+        + 10 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 20,8,...  [0x10496cb88,0x10496cb7c,...]  book_v2.hpp:83
+        + 8 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 300,332  [0x10496cca0,0x10496ccc0]  book_v2.hpp:97
+        + 8 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 580  [0x10496cdb8]  book_v2.hpp:99
+        + 7 lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay) + 680,672,...  [0x10496d36c,0x10496d364,...]  book_v2.hpp:0
+        + 7 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 68  [0x10496d3b8]  book_v2.hpp:220
+        + ! 4 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 0,8,...  [0x10496d564,0x10496d56c,...]  book_v2.hpp:154
+        + ! 3 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 24  [0x10496d57c]  book_v2.hpp:155
+        + 6 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 168,248  [0x10496cc1c,0x10496cc6c]  book_v2.hpp:0
+        + 6 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 144,156  [0x10496cc04,0x10496cc10]  book_v2.hpp:87
+        + 5 ???  (in replay)  load address 0x104964000 + 0x6e48  [0x10496ae48]
+        + 4 lob::BookV2<lob::CountingListener>::acquire()  (in replay) + 268,256,...  [0x10496d670,0x10496d664,...]  book_v2.hpp:162
+        + 4 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 132  [0x10496cbf8]  book_v2.hpp:85
+        + 4 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 124  [0x10496d3f0]  book_v2.hpp:223
+        + 3 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 560  [0x10496cda4]  book_v2.hpp:98
+        + 3 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 0  [0x10496d374]  book_v2.hpp:217
+        + 2 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 60  [0x10496d3b0]  book_v2.hpp:219
+        + 1 lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay) + 680  [0x10496d0bc]  book_v2.hpp:0
+        + 1 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 184  [0x10496cc2c]  book_v2.hpp:103
+        + 1 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 460  [0x10496cd40]  book_v2.hpp:91
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 148  [0x10496d408]  book_v2.hpp:0
+        + 1 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 464  [0x10496d544]  book_v2.hpp:236
+        85 lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay) + 480,472,...  [0x10496d554,0x10496d54c,...]  book_v2.hpp:236
+        56 lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay) + 416  [0x10496cb6c]  book_v2.hpp:81
+        8 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 176,168  [0x10496c7c4,0x10496c7bc]  book_v2.hpp:71
+        7 lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay) + 660,668,...  [0x10496c9a8,0x10496c9b0,...]  book_v2.hpp:69
+        7 main  (in replay) + 9256  [0x104967140]  replay.cpp:234
+        + 3 lob::BookV2<lob::CountingListener>::BookV2(lob::CountingListener&, lob::BookConfig)  (in replay) + 152,216,...  [0x10496c444,0x10496c484,...]  book_v2.hpp:36
+        + 3 lob::BookV2<lob::CountingListener>::BookV2(lob::CountingListener&, lob::BookConfig)  (in replay) + 380  [0x10496c528]  book_v2.hpp:42
+        + ! 3 std::vector<lob::BookV2<lob::CountingListener>::Node>::__append(unsigned long)  (in replay) + 188  [0x10496c6b8]  vector.h:958
+        + !   3 __bzero  (in libsystem_platform.dylib) + 68  [0x18e9c1074]
+        + 1 lob::BookV2<lob::CountingListener>::BookV2(lob::CountingListener&, lob::BookConfig)  (in replay) + 352  [0x10496c50c]  book_v2.hpp:38
+        +   1 lob::FlatHashMap::rehash(unsigned long)  (in replay) + 60  [0x10496a394]  flat_hash_map.hpp:92
+        +     1 std::vector<lob::FlatHashMap::Slot>::assign(unsigned long, lob::FlatHashMap::Slot const&)  (in replay) + 156  [0x10496a4f4]  vector.h:1091
+        2 lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay) + 204  [0x10496cc40]  book_v2.hpp:103
+        1 main  (in replay) + 9200  [0x104967108]  replay.cpp:234
+          1 ???  (in replay)  load address 0x104964000 + 0x6068  [0x10496a068]
+            1 xzm_segment_group_free_chunk  (in libsystem_malloc.dylib) + 860  [0x18e7bd49c]
+              1 _xzm_segment_group_span_mark_free  (in libsystem_malloc.dylib) + 136  [0x18e7bdbfc]
+                1 _xzm_reclaim_mark_free  (in libsystem_malloc.dylib) + 112  [0x18e7bbdf0]
+                  1 xzm_reclaim_mark_free_locked  (in libsystem_malloc.dylib) + 116  [0x18e7bb968]
+                    1 mach_vm_reclaim_try_enter  (in libsystem_kernel.dylib) + 296  [0x18e98717c]
+                      1 mach_absolute_time  (in libsystem_kernel.dylib) + 112  [0x18e974110]
+
+Total number in stack (recursive counted multiple, when >=5):
+
+Sort by top of stack, same collapsed (when >= 5):
+        main  (in replay)        802
+        lob::BookV2<lob::CountingListener>::add(unsigned long long, lob::Side, lob::OrderType, int, unsigned int)  (in replay)        663
+        lob::BookV2<lob::CountingListener>::rest(unsigned long long, lob::Side, int, unsigned int)  (in replay)        407
+        lob::BookV2<lob::CountingListener>::cancel(unsigned long long)  (in replay)        318
+        lob::BookV2<lob::CountingListener>::match<(lob::Side)0>(unsigned long long, int, bool, unsigned int)  (in replay)        304
+        lob::BookV2<lob::CountingListener>::match<(lob::Side)1>(unsigned long long, int, bool, unsigned int)  (in replay)        299
+        lob::BookV2<lob::CountingListener>::acquire()  (in replay)        237
+        lob::BookV2<lob::CountingListener>::modify(unsigned long long, int, unsigned int)  (in replay)        166
+        ???  (in replay)  load address 0x104964000 + 0x6d58  [0x10496ad58]        49
+        ???  (in replay)  load address 0x104964000 + 0x6d30  [0x10496ad30]        44
+        ???  (in replay)  load address 0x104964000 + 0x6d84  [0x10496ad84]        31
+        ???  (in replay)  load address 0x104964000 + 0x6d64  [0x10496ad64]        20
+        ???  (in replay)  load address 0x104964000 + 0x6d80  [0x10496ad80]        18
+        ???  (in replay)  load address 0x104964000 + 0x6d1c  [0x10496ad1c]        17
+        ???  (in replay)  load address 0x104964000 + 0x6e48  [0x10496ae48]        15
+        ???  (in replay)  load address 0x104964000 + 0x6d28  [0x10496ad28]        9
+        ???  (in replay)  load address 0x104964000 + 0x6d40  [0x10496ad40]        5
+
+Binary Images:
+       0x104964000 -        0x10496e123 +replay (0) <891ED69E-6027-3261-99CE-53D8FBBBAE1F> /Users/*/replay
+       0x18e544000 -        0x18e596b4b  libobjc.A.dylib (951.7) <03BD9E32-CF0A-37B0-898A-3CE8DE06D842> /usr/lib/libobjc.A.dylib
+       0x18e597000 -        0x18e5cbd58  libdyld.dylib (1387) <957F93B3-8805-39C7-9C51-EDD1715F550E> /usr/lib/system/libdyld.dylib
+       0x18e5cc000 -        0x18e67f4ff  dyld (1.0.0 - 1387) <74E52480-C2BD-3C8D-812D-95FE2B74A096> /usr/lib/dyld
+       0x18e680000 -        0x18e683228  libsystem_blocks.dylib (96) <E0AC1231-27AA-3A13-8FAC-41D5802B1F3C> /usr/lib/system/libsystem_blocks.dylib
+       0x18e684000 -        0x18e6d855f  libxpc.dylib (3102.160.5) <33E44C2D-D65E-37A6-B85F-1A4CF524A050> /usr/lib/system/libxpc.dylib
+       0x18e6d9000 -        0x18e6f99ff  libsystem_trace.dylib (1861.160.4) <93F1DD8C-6CD9-32B9-B222-D23DA5D161B4> /usr/lib/system/libsystem_trace.dylib
+       0x18e6fa000 -        0x18e7a85f7  libcorecrypto.dylib (1922.160.10) <0642DDAD-4771-3C82-805C-E7C6701C1461> /usr/lib/system/libcorecrypto.dylib
+       0x18e7a9000 -        0x18e7f9257  libsystem_malloc.dylib (812.160.5) <D969A907-3E43-3951-9365-8C2DB3812E9D> /usr/lib/system/libsystem_malloc.dylib
+       0x18e7fa000 -        0x18e84123f  libdispatch.dylib (1542.160.2) <B2000CD5-F580-314A-A141-E036719D854E> /usr/lib/system/libdispatch.dylib
+       0x18e842000 -        0x18e844ffb  libsystem_featureflags.dylib (103) <FEE12F9C-344B-33B3-8EDD-283580EF1C67> /usr/lib/system/libsystem_featureflags.dylib
+       0x18e845000 -        0x18e8c61e7  libsystem_c.dylib (1752.160.4) <D77CEB62-AFF6-3CEC-BA9B-4F057FBE2EB5> /usr/lib/system/libsystem_c.dylib
+       0x18e8c7000 -        0x18e957ae7  libc++.1.dylib (2100.43) <F0FD393C-15BC-3C75-A19D-897F7B225C78> /usr/lib/libc++.1.dylib
+       0x18e958000 -        0x18e97275f  libc++abi.dylib (2100.43) <F38A9C58-22AB-3798-BBAE-8DCD9CC0CE27> /usr/lib/libc++abi.dylib
+       0x18e973000 -        0x18e9b02e7  libsystem_kernel.dylib (12377.161.14) <C6A4A4CB-92E6-3BAF-AAE0-E8306259209A> /usr/lib/system/libsystem_kernel.dylib
+       0x18e9b1000 -        0x18e9bdb3b  libsystem_pthread.dylib (539.100.4) <A373F0B0-9880-326A-88B4-DD8BE4E33072> /usr/lib/system/libsystem_pthread.dylib
+       0x18e9be000 -        0x18e9c6963  libsystem_platform.dylib (375.120.2) <EDB83A19-EC17-32DE-9350-6145970A85D6> /usr/lib/system/libsystem_platform.dylib
+       0x18e9c7000 -        0x18e9f66eb  libsystem_info.dylib (600) <9B5FB84B-31AD-3EA7-8F89-8C700D369DC8> /usr/lib/system/libsystem_info.dylib
+       0x192994000 -        0x19299de5f  libsystem_darwin.dylib (1752.160.4) <8E07D22E-CE5A-38A0-B091-5B0338C326F5> /usr/lib/system/libsystem_darwin.dylib
+       0x192dff000 -        0x192e111b6  libsystem_notify.dylib (348.160.3) <15799128-6CBD-30D6-A2BB-B9D02B4470C0> /usr/lib/system/libsystem_notify.dylib
+       0x1950d0000 -        0x1950eaf7b  libsystem_networkextension.dylib (2226.161.1) <9C7B1EEB-47BE-3791-93A9-CFC693CB9417> /usr/lib/system/libsystem_networkextension.dylib
+       0x19516d000 -        0x195184fdf  libsystem_asl.dylib (406) <54439739-33EE-3273-839F-CBA67D7F5CB1> /usr/lib/system/libsystem_asl.dylib
+       0x196d26000 -        0x196d2e387  libsystem_symptoms.dylib (2169.160.3) <229122B9-B8B1-3F2F-870E-8650AE3C4FB5> /usr/lib/system/libsystem_symptoms.dylib
+       0x19afcb000 -        0x19b0035b7  libsystem_containermanager.dylib (725.160.3) <14B2A47F-19C8-392F-8FDB-FE8AE375DD41> /usr/lib/system/libsystem_containermanager.dylib
+       0x19c3dd000 -        0x19c3e15d7  libsystem_configuration.dylib (1405.160.3) <D8D6280B-783D-3550-BDBA-2861AE40604F> /usr/lib/system/libsystem_configuration.dylib
+       0x19c3e2000 -        0x19c3e899f  libsystem_sandbox.dylib (2680.160.6) <54688162-B50D-3D31-A1E8-7B9766D3530D> /usr/lib/system/libsystem_sandbox.dylib
+       0x19da3d000 -        0x19da401fb  libquarantine.dylib (196.160.2) <EEE5AADB-52E1-3C4C-881A-70405770B1F1> /usr/lib/system/libquarantine.dylib
+       0x19e1dc000 -        0x19e1e2d03  libsystem_coreservices.dylib (191.5.1) <D4ACD2AC-5702-3C45-85A0-300B2C2D19E1> /usr/lib/system/libsystem_coreservices.dylib
+       0x19e76b000 -        0x19e7a8a77  libsystem_m.dylib (3312.100.1) <B54FBE99-DB0B-32C7-ABDD-C2206DF606A4> /usr/lib/system/libsystem_m.dylib
+       0x19e7aa000 -        0x19e7ad527  libmacho.dylib (1387) <949131E5-BDA2-39BA-AA50-62651BB51802> /usr/lib/system/libmacho.dylib
+       0x19e7c7000 -        0x19e7d43a7  libcommonCrypto.dylib (600035) <3B110564-5278-3CB0-85F1-2CE8431FF935> /usr/lib/system/libcommonCrypto.dylib
+       0x19e7d5000 -        0x19e7deca3  libunwind.dylib (2100.2) <05FD0014-55B1-3B8A-A6BA-6C7A389C4123> /usr/lib/system/libunwind.dylib
+       0x19e7e7000 -        0x19e7f1bef  libcopyfile.dylib (240.160.2.0.1) <D0009B8A-8ECC-3D56-9206-7E1839707F93> /usr/lib/system/libcopyfile.dylib
+       0x19e7f2000 -        0x19e7f5987  libcompiler_rt.dylib (103.3) <6FB345CA-7F5C-3263-A23F-143F7539FD8A> /usr/lib/system/libcompiler_rt.dylib
+       0x19e7f6000 -        0x19e7fa78b  libsystem_collections.dylib (1752.160.4) <C8160BD2-5941-3DC0-BB40-F8C2B8156EC4> /usr/lib/system/libsystem_collections.dylib
+       0x19e7fb000 -        0x19e7fe4cf  libsystem_secinit.dylib (168.100.7) <ECABC024-8F02-374A-BB7E-29437CEA2ABD> /usr/lib/system/libsystem_secinit.dylib
+       0x19e7ff000 -        0x19e801bf7  libremovefile.dylib (85.100.6) <7460B5AE-469A-36A0-A7EC-6C7D69628E86> /usr/lib/system/libremovefile.dylib
+       0x19e802000 -        0x19e802f27  libkeymgr.dylib (31) <7E863FCA-F3FF-32C7-8A8C-F983E946AFC3> /usr/lib/system/libkeymgr.dylib
+       0x19e803000 -        0x19e80be37  libsystem_dnssd.dylib (2881.160.4) <305F4398-E688-3384-B351-02D865EC8A04> /usr/lib/system/libsystem_dnssd.dylib
+       0x19e80c000 -        0x19e81109b  libcache.dylib (95) <9CD7B1E1-3E47-339C-A193-2392E3E0ED23> /usr/lib/system/libcache.dylib
+       0x19e812000 -        0x19e813ce3  libSystem.B.dylib (1356) <4FED5EE2-5D3E-35B1-A170-9859C4B683BB> /usr/lib/libSystem.B.dylib
+       0x2927d5000 -        0x2927dc349  libRosetta.dylib (367.9) <0C7397C6-D747-31F2-8BC1-4096213BDE5C> /usr/lib/libRosetta.dylib
+       0x2943e8000 -        0x2943eba4b  libsystem_darwindirectory.dylib (122) <971A4F65-493D-39F3-846D-0D33FA2769FD> /usr/lib/system/libsystem_darwindirectory.dylib
+       0x2943ec000 -        0x2943f639b  libsystem_eligibility.dylib (319.160.17) <750CA446-92EA-3A56-9A7B-CC0841686C50> /usr/lib/system/libsystem_eligibility.dylib
+       0x2943f7000 -        0x2943fe88b  libsystem_sanitizers.dylib (26.1) <D88EC709-9AA8-3083-B22B-D3CB39678D71> /usr/lib/system/libsystem_sanitizers.dylib
+       0x2943ff000 -        0x2943ffbb7  libsystem_trial.dylib (474.2.18.2) <7194FF5B-A6C5-3D67-B00A-90209F10D603> /usr/lib/system/libsystem_trial.dylib

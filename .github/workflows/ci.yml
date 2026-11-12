@@ -32,3 +32,40 @@ jobs:
         run: |
           ./build/gen_day --messages 1000000 --out day.bin
           ./build/replay --day day.bin --runs 1
+
+  # x86-64 numbers and a deterministic profile. Shared runners are noisy, so
+  # the replay here is for rdtsc-resolution distributions, not for absolute
+  # throughput; cachegrind counts instructions and simulated cache misses, which
+  # do not depend on the machine's load at all.
+  profile:
+    name: x86-64 replay + cachegrind
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install valgrind
+        run: sudo apt-get update -q && sudo apt-get install -y -q valgrind
+      - name: Build (optimized, with symbols and frame pointers)
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=g++-14 \
+                -DCMAKE_CXX_FLAGS="-O3 -fno-omit-frame-pointer" -DLOB_TESTS=OFF
+          cmake --build build -j 4
+      - name: Generate the day
+        run: ./build/gen_day --messages 5000000 --seed 42 --out day.bin
+      - name: Replay with rdtsc (full day, 5 runs)
+        run: ./build/replay --day day.bin --runs 5 --json replay-x86.json | tee replay-x86.md
+      - name: Cachegrind, 300k messages, both books
+        run: |
+          ./build/gen_day --messages 300000 --seed 42 --out small.bin
+          for b in v1 v2; do
+            valgrind --tool=cachegrind --cache-sim=yes --cachegrind-out-file=cg.$b \
+              ./build/replay --day small.bin --book $b --runs 1 --skip-latency 2> cg.$b.summary
+            echo "=== $b summary"; cat cg.$b.summary
+            echo "=== $b per function"; cg_annotate cg.$b | head -45
+          done | tee cachegrind.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: profile
+          path: |
+            replay-x86.md
+            replay-x86.json
+            cachegrind.md

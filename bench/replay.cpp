@@ -2,6 +2,7 @@
 //
 //   usage: replay [--day day.bin] [--book v1|v2|both] [--runs 5] [--pin CPU] [--json out.json]
 //                 [--expected N]   (override the pool / hash-map sizing stored in the day file)
+//                 [--skip-latency] (throughput pass only: for running under a profiler)
 //
 // Three passes per book, each on a fresh book:
 //   1. verify     : (with --book both) v1 and v2 must produce the same event
@@ -94,7 +95,7 @@ std::uint64_t verify_hash(const std::vector<Command>& day, const BookConfig& cfg
 
 template <template <class> class Book>
 Result measure(const char* name, const std::vector<Command>& day, const BookConfig& cfg, int runs,
-               double ns_per_tick) {
+               double ns_per_tick, bool skip_latency) {
     Result r;
     r.book = name;
 
@@ -114,6 +115,7 @@ Result measure(const char* name, const std::vector<Command>& day, const BookConf
     double med = secs[secs.size() / 2];
     r.throughput_mps = double(day.size()) / med / 1e6;
     r.ns_per_msg = med * 1e9 / double(day.size());
+    if (skip_latency) return r;
 
     // Latency: one timestamp pair per message, stored in memory touched in advance.
     std::vector<std::uint32_t> all(day.size());
@@ -167,8 +169,11 @@ int main(int argc, char** argv) {
     std::string path = "day.bin", which = "both", json;
     int runs = 5, pin = -1;
     long long expected = -1;
-    for (int i = 1; i + 1 < argc; i += 2) {
+    bool skip_latency = false;
+    for (int i = 1; i < argc; i += 2) {
         std::string a = argv[i];
+        if (a == "--skip-latency") { skip_latency = true; --i; continue; }
+        if (i + 1 >= argc) { std::fprintf(stderr, "%s needs a value\n", a.c_str()); return 2; }
         if (a == "--day") path = argv[i + 1];
         else if (a == "--book") which = argv[i + 1];
         else if (a == "--runs") runs = std::atoi(argv[i + 1]);
@@ -202,7 +207,7 @@ int main(int argc, char** argv) {
 
     const double ns_per_tick = calibrate_ns_per_tick();
     // The cost of the measurement itself: back-to-back timestamp pairs.
-    std::vector<std::uint32_t> empty(1'000'000);
+    std::vector<std::uint32_t> empty(skip_latency ? 1 : 1'000'000);
     for (auto& e : empty) {
         std::uint64_t a = ticks();
         std::uint64_t b = ticks();
@@ -225,10 +230,10 @@ int main(int argc, char** argv) {
     }
 
     std::vector<Result> results;
-    if (which == "v1" || which == "both") results.push_back(measure<BookV1>("v1 (std containers)", day, h.cfg, runs, ns_per_tick));
-    if (which == "v2" || which == "both") results.push_back(measure<BookV2>("v2 (arrays, pool, flat map)", day, h.cfg, runs, ns_per_tick));
+    if (which == "v1" || which == "both") results.push_back(measure<BookV1>("v1 (std containers)", day, h.cfg, runs, ns_per_tick, skip_latency));
+    if (which == "v2" || which == "both") results.push_back(measure<BookV2>("v2 (arrays, pool, flat map)", day, h.cfg, runs, ns_per_tick, skip_latency));
     for (const auto& r : results) print(r);
-    if (results.size() == 2)
+    if (results.size() == 2 && !skip_latency)
         std::printf("\nv2 vs v1: %.2fx throughput, p50 %.0f -> %.0f ns, p99 %.0f -> %.0f ns, p99.9 %.0f -> %.0f ns\n",
                     results[1].throughput_mps / results[0].throughput_mps, results[0].all.p50, results[1].all.p50,
                     results[0].all.p99, results[1].all.p99, results[0].all.p999, results[1].all.p999);
