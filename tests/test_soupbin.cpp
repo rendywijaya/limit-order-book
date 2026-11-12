@@ -1,4 +1,5 @@
 // test_soupbin.cpp — SoupBinTCP framing, partial reads, login and sequencing.
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include <cstring>

@@ -151,6 +151,27 @@ Lateness p99 under 1 µs at both speeds says the replay kept to the schedule;
 the long tails in the stages are the operating system, not the queue
 discipline.
 
+### x86-64 Linux (GitHub Actions runner, GCC 14, `rdtsc` at 0.385 ns)
+
+The CI `profile` job replays the same kind of capture on a shared x86-64 VM
+(`results/linux-x86/t2t-x86-*.md`). Absolute throughput is indicative there,
+but the counter resolves to a third of a nanosecond, so the stage shapes the
+M2's 41.67 ns tick hides become visible:
+
+| run | feed p50 | decide p50 | risk p50 | send p50 | queue p50 | tick-to-trade p50 | p90 | p99 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| flat, 1 thread | 59 | 49 | 29 | 179 | | **394** | 887 | 1,380 |
+| flat, 2 threads | 59 | 49 | 29 | 210 | **197** | 616 | 1,035 | 1,380 |
+| paced 10× (400 k msg/s), 1 thread | 185 | 49 | 40 | 234 | | 592 | 1,528 | 2,958 |
+
+The risk gate's median is **29 ns** for eight checks; the quoter's decision
+49 ns; the feed stage 59 ns for decode, book update and snapshot. The
+expensive stage is `send` at 179 ns: gateway record, OUCH encode, SoupBinTCP
+frame, the `std::function` hop to the wire, and the hash the harness keeps
+for the determinism check. The two-thread hop is 197 ns at the median on
+this machine. At 10× capture pace the feed stage triples (185 vs 59 ns),
+the same cold-path effect as on the M2.
+
 ### What the numbers do not say
 
 * One instrument quoted, eight tracked. A real system quotes hundreds; the

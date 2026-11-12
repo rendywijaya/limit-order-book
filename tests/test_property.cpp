@@ -7,6 +7,7 @@
 // left — usually a handful of messages — is printed as a reproduction.
 //
 // Set LOB_PROPERTY_SEEDS (default 200) to run longer, e.g. overnight.
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include <cstdlib>

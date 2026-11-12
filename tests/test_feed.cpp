@@ -1,5 +1,6 @@
 // test_feed.cpp — the feed handler and market book against a reference, over
 // random multi-symbol ITCH streams; plus the stream format.
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include <map>
